@@ -1,5 +1,5 @@
-const apiKey = 'apikey';
-const token = 'token';
+const apiKey = '5942846fd6f9e669e79610ef2fd10d84';
+const token = 'a404c83a3c508a1c70fba3172a20dc3d9ab9366b3c1ea2ac2b045d84111f82a5';
 const access = `key=${apiKey}&token=${token}`;
 const link = 'https://api.trello.com/1/';
 let url;
@@ -238,6 +238,34 @@ function refreshDOM() {
         }).catch(error => {
             console.log(error);
         });
+
+        const checklistDetails = JSON.parse(localStorage.getItem('checklist'));
+        if(checklistDetails.status){
+            const checklistName = document.createElement('div');
+            checklistName.className = 'checklistName';
+            checklistName.innerText = checklistDetails.name;
+
+            const checklistClose = document.createElement('button');
+            checklistClose.className = 'checklistClose';
+            checklistClose.innerText = 'close';
+            checklistClose.addEventListener('click', closeChecklistRequest);
+
+            const checklistTitle = document.createElement('div');
+            checklistTitle.className = 'checklistTitle';
+            checklistTitle.appendChild(checklistName);
+            checklistTitle.appendChild(checklistClose);
+
+            const cardDetails = document.createElement('div');
+            cardDetails.className = 'cardDetails';
+            cardDetails.appendChild(checklistTitle);
+
+            const popup = document.createElement('div');
+            popup.className = 'popUp';
+            popup.appendChild(cardDetails);
+
+            document.body.append(popup);
+        }
+
     }
 }
 
@@ -252,7 +280,7 @@ async function openBoard() {
 
 function goToHomePage() {
     localStorage.setItem('home', JSON.stringify(false));
-    localStorage.setItem('checklist', JSON.stringify(false));
+    localStorage.setItem('checklist', JSON.stringify({ name: '', status: false }));
     refreshDOM();
 }
 
@@ -398,7 +426,12 @@ async function deleteCardRequest() {
 // checklists function
 function openChecklistRequest() {
     console.log('open Checklist Request');
-    // const checklistId = event.srcElement.parentElement.getAttribute('cardId');
-    // localStorage.setItem('checklist', JSON.stringify(true));
-    // console.log(JSON.parse(localStorage.getItem('checklist')));
+    const checklistName = event.srcElement.innerText;
+    localStorage.setItem('checklist', JSON.stringify({ name: checklistName, status: true }));
+    refreshDOM();
+}
+
+function closeChecklistRequest() {
+    localStorage.setItem('checklist', JSON.stringify({ name: '', status: false }));
+    refreshDOM();
 }
