@@ -1,0 +1,158 @@
+body {
+    font-family: helvetica;
+}
+
+#header {
+    text-align: center;
+    font-weight: bold;
+    padding: 1%;
+    color: white;
+    background-color: blue;
+}
+
+#title {
+    padding: 0.5%;
+    font: bold;
+}
+
+#container {
+    display: flex;
+    height: 580px;
+    overflow-x: scroll;
+}
+
+.board {
+    width: 160px;
+    height: 75px;
+    border-radius: 10px;
+    color: white;
+    padding: 5px;
+    margin: 10px 0 0 10px;
+    background-color: green;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.board_title {
+    height: 50px;
+}
+
+.createBoard {
+    background: #f4f4f4;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.back {
+    text-decoration: underline;
+    padding: 5px;
+    background: green;
+    color: white;
+    border-radius: 10px;
+}
+
+.boardBtns {
+    display: flex;
+    justify-content: space-between;
+}
+
+.boardUpdate {
+    padding: 5px;
+    border-radius: 5px;
+    background-color: blue;
+    border: none;
+}
+
+.listUpdate {
+    border-radius: 5px;
+    background: blue;
+}
+
+.boardDelete {
+    background-color: red;
+}
+
+.listHeader {
+    width: 200px;
+    color: black;
+    background: #f4f4f4;
+    display: flex;
+    padding: 5px;
+    justify-content: space-between;
+    border: 1px solid;
+    border-radius: 2px;
+    height: fit-content;
+}
+
+.addList {
+    text-align: center;
+    padding: 5px;
+    margin-left: 15px;
+    height: max-content;
+    border: 1px solid;
+    font-size: inherit;
+    width: 200px;
+    border-radius: 5px;
+    background: #f4f4f4;
+}
+
+.listContainer{
+    margin-left: 15px;
+    background: white;
+    border-radius: 5px;
+    padding: 5px;
+    height: fit-content;
+}
+
+.cardContainer{
+    max-height: 450px;
+    border: 1px solid;
+    background: #f4f4f4;
+    padding: 2px;
+    margin: 3px 0 3px 0;
+    border-radius: 3px;
+    overflow-y: scroll;
+}
+.cards{
+    background: white;
+    margin: 5px 0 0 0;
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid;
+    padding: 2px;
+}
+
+.cardBtns{
+    display: grid;
+}
+
+.addCard{
+    width: 100%;
+    font-size: 15px;
+    padding: 5px;
+    border: 1px solid;
+    border-radius: 3px;
+}
+
+.cardTitle{
+    width: 160px;
+}
+
+#popUp{
+    width: 99%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.checklistContainer{
+    background: white;
+    width: 50%;
+    height: 90%;
+    margin: 30px 0 0 0;
+}

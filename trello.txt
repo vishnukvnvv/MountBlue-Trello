@@ -1,0 +1,22 @@
+tasks
+-> create trello with received data
+-> funtions
+    * add list
+    * delete list
+    * modify list
+
+    * add card
+    * delete card
+    * modify card
+
+    * add checklist
+    * delete checklist
+    * modify checklist
+
+    * add item in checklist
+    * delete item in checklist
+    * modify item in checklist
+
+
+trello api key - 5942846fd6f9e669e79610ef2fd10d84
+trello token - a404c83a3c508a1c70fba3172a20dc3d9ab9366b3c1ea2ac2b045d84111f82a5
