@@ -91,6 +91,7 @@ function deleteCardApiRequest(id) {
 // ------------------------------------------------------------------------------
 const header = document.getElementById('header');
 const container = document.getElementById('container');
+const popUp = document.getElementById('popUp');
 const title = document.getElementById('title');
 title.style.fontWeight = 'bold';
 
@@ -259,11 +260,11 @@ function refreshDOM() {
             cardDetails.className = 'cardDetails';
             cardDetails.appendChild(checklistTitle);
 
-            const popup = document.createElement('div');
-            popup.className = 'popUp';
-            popup.appendChild(cardDetails);
+            popUp.appendChild(cardDetails);
 
-            document.body.append(popup);
+            document.body.append(popUp);
+        }else{
+
         }
 
     }
@@ -432,6 +433,7 @@ function openChecklistRequest() {
 }
 
 function closeChecklistRequest() {
+    console.log('close Checklist Request');
     localStorage.setItem('checklist', JSON.stringify({ name: '', status: false }));
     refreshDOM();
 }
