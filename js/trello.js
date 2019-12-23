@@ -1,5 +1,5 @@
-const apiKey = '5942846fd6f9e669e79610ef2fd10d84';
-const token = 'a404c83a3c508a1c70fba3172a20dc3d9ab9366b3c1ea2ac2b045d84111f82a5';
+const apiKey = 'apiKey';
+const token = 'token';
 const access = `key=${apiKey}&token=${token}`;
 const link = 'https://api.trello.com/1/';
 let url;
@@ -88,10 +88,41 @@ function deleteCardApiRequest(id) {
     url = `${link}cards/${id}?${access}`;
     return deleteReq(url);
 }
+
+// checklist functions 
+function getChecklistApiRequest(id) {
+    url = `${link}cards/${id}/checklists?${access}`;
+    return get(url);
+}
+
+function addChecklistApiRequest(id, name) {
+    url = `${link}checklists?name=${name}&idCard=${id}&${access}`;
+    return post(url);
+}
+
+function updateChecklistApiRequest(id, name) {
+    url = `${link}checklists/${id}?name=${name}&${access}`;
+    return put(url);
+}
+
+function deleteChecklistApiRequest(id) {
+    url = `${link}checklists/${id}?${access}`;
+    return deleteReq(url);
+}
+
+// checklist item function
+function addItemApiRequest(id, name) {
+    url = `${link}checklists/${id}/checkItems?name=${name}&${access}`;
+    return post(url);
+}
+
+function deleteItemApiRequest (checklistId, itemId) {
+    url = `${link}checklists/${checklistId}/checkItems/${itemId}?${access}`;
+    return deleteReq(url);
+}
 // ------------------------------------------------------------------------------
 const header = document.getElementById('header');
 const container = document.getElementById('container');
-const popUp = document.getElementById('popUp');
 const title = document.getElementById('title');
 title.style.fontWeight = 'bold';
 
@@ -103,6 +134,7 @@ function refreshDOM() {
     while (container.hasChildNodes()) {
         container.removeChild(container.lastChild);
     }
+
     if (!JSON.parse(localStorage.getItem('home'))) {
         title.innerText = 'Boards';
         header.style.background = 'blue';
@@ -241,36 +273,124 @@ function refreshDOM() {
         });
 
         const checklistDetails = JSON.parse(localStorage.getItem('checklist'));
-        if(checklistDetails.status){
-            const checklistName = document.createElement('div');
-            checklistName.className = 'checklistName';
-            checklistName.innerText = checklistDetails.name;
+        if (checklistDetails.status) {
+            const hasPopUp = document.getElementsByClassName('popUp');
+            if (hasPopUp.length > 0) {
+                document.body.lastElementChild.remove();
+            }
 
-            const checklistClose = document.createElement('button');
-            checklistClose.className = 'checklistClose';
-            checklistClose.innerText = 'close';
-            checklistClose.addEventListener('click', closeChecklistRequest);
+            const cardName = document.createElement('div');
+            cardName.className = 'cardName';
+            cardName.innerText = checklistDetails.name;
+
+            const cardClose = document.createElement('button');
+            cardClose.className = 'cardClose';
+            cardClose.innerText = 'close';
+            cardClose.addEventListener('click', closeChecklistRequest);
 
             const checklistTitle = document.createElement('div');
             checklistTitle.className = 'checklistTitle';
-            checklistTitle.appendChild(checklistName);
-            checklistTitle.appendChild(checklistClose);
+            checklistTitle.appendChild(cardName);
+            checklistTitle.appendChild(cardClose);
+
+            const addChecklist = document.createElement('button');
+            addChecklist.className = 'addChecklist';
+            addChecklist.innerText = 'Add Checklist';
+            addChecklist.setAttribute('cardId', checklistDetails.id);
+            addChecklist.addEventListener('click', addChecklistRequest);
+
+            const checklistContainer = document.createElement('div');
+            checklistContainer.className = 'checklistContainer';
+
+            getChecklistApiRequest(checklistDetails.id).then(checklists => {
+                for (let checklist of checklists) {
+                    const cehcklistText = document.createTextNode(checklist.name);
+
+                    const checklistUpdate = document.createElement('button');
+                    checklistUpdate.className = 'listUpdate';
+                    checklistUpdate.innerText = 'U';
+                    checklistUpdate.addEventListener('click', updateChecklistRequest);
+
+                    const checklistDelete = document.createElement('button');
+                    checklistDelete.className = 'listUpdate boardDelete';
+                    checklistDelete.innerText = 'D';
+                    checklistDelete.addEventListener('click', deleteChecklistRequest);
+
+                    const checkListBtns = document.createElement('div');
+                    checkListBtns.appendChild(checklistUpdate);
+                    checkListBtns.appendChild(checklistDelete);
+
+                    const checklistName = document.createElement('div');
+                    checklistName.className = 'checklistName';
+                    checklistName.appendChild(cehcklistText);
+                    checklistName.appendChild(checkListBtns);
+
+                    const checklistItems = document.createElement('div');
+                    checklistItems.className = 'checklistItems';
+
+                    for (let toDo of checklist.checkItems) {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+
+                        const listItem = document.createTextNode(toDo.name);
+
+                        const listItemContainer = document.createElement('div');
+                        listItemContainer.appendChild(checkbox);
+                        listItemContainer.appendChild(listItem);
+
+                        const deleteItem = document.createElement('button');
+                        deleteItem.innerText = 'D'
+                        deleteItem.className = 'listUpdate boardDelete';
+                        deleteItem.addEventListener('click', deleteItemRequest);
+
+                        const listItemBox = document.createElement('div');
+                        listItemBox.className = 'listItemBox';
+                        listItemBox.setAttribute('itemsId', toDo.id);
+                        listItemBox.appendChild(listItemContainer);
+                        listItemBox.appendChild(deleteItem);
+
+                        checklistItems.appendChild(listItemBox);
+                    }
+
+                    const addListItem = document.createElement('button');
+                    addListItem.innerText = 'Add an Item';
+                    addListItem.className = 'addChecklist';
+                    addListItem.addEventListener('click', addItemRequest);
+
+                    const checklistBox = document.createElement('div');
+                    checklistBox.className = 'checklistBox';
+                    checklistBox.setAttribute('checklistId', checklist.id);
+                    checklistBox.appendChild(checklistName);
+                    checklistBox.appendChild(checklistItems);
+                    checklistBox.appendChild(addListItem);
+
+                    checklistContainer.appendChild(checklistBox);
+                }
+            })
 
             const cardDetails = document.createElement('div');
             cardDetails.className = 'cardDetails';
             cardDetails.appendChild(checklistTitle);
+            cardDetails.appendChild(addChecklist);
+            cardDetails.appendChild(checklistContainer);
+
+            const popUp = document.createElement('div');
+            popUp.className = 'popUp';
 
             popUp.appendChild(cardDetails);
 
             document.body.append(popUp);
-        }else{
-
+        } else {
+            const popUp = document.getElementsByClassName('popUp');
+            if (popUp.length > 0) {
+                hasPopUp = false;
+                document.body.lastElementChild.remove();
+            }
         }
-
     }
 }
 
-async function openBoard() {
+function openBoard() {
     localStorage.setItem('home', JSON.stringify(true));
     const boardId = event.srcElement.parentElement.getAttribute('boardId');
     localStorage.setItem('boardId', JSON.stringify(boardId));
@@ -281,7 +401,7 @@ async function openBoard() {
 
 function goToHomePage() {
     localStorage.setItem('home', JSON.stringify(false));
-    localStorage.setItem('checklist', JSON.stringify({ name: '', status: false }));
+    localStorage.setItem('checklist', JSON.stringify({ id: 0, name: '', status: false }));
     refreshDOM();
 }
 
@@ -426,14 +546,101 @@ async function deleteCardRequest() {
 
 // checklists function
 function openChecklistRequest() {
-    console.log('open Checklist Request');
-    const checklistName = event.srcElement.innerText;
-    localStorage.setItem('checklist', JSON.stringify({ name: checklistName, status: true }));
+    const cardName = event.srcElement.innerText;
+    const cardId = event.srcElement.parentElement.getAttribute('cardId');
+    localStorage.setItem('checklist', JSON.stringify({ id: cardId, name: cardName, status: true }));
     refreshDOM();
 }
 
 function closeChecklistRequest() {
-    console.log('close Checklist Request');
-    localStorage.setItem('checklist', JSON.stringify({ name: '', status: false }));
+    localStorage.setItem('checklist', JSON.stringify({ id: 0, name: '', status: false }));
+    refreshDOM();
+}
+
+async function addChecklistRequest() {
+    const cardId = event.srcElement.getAttribute('CardId');
+    const name = prompt('New cheklist name?');
+    if (name) {
+        await addChecklistApiRequest(cardId, name).then(data => {
+            console.log(data);
+            alert('CheckList added');
+        }).catch(error => {
+            console.log(error);
+            alert('Failed to add checkList');
+        });
+    } else {
+        alert('Failed to add checkList');
+    }
+    refreshDOM();
+}
+
+async function updateChecklistRequest() {
+    const checklistId = event.srcElement.parentElement.parentElement.parentElement.getAttribute('checklistId');
+    const name = prompt('New Title');
+    if (name) {
+        await updateChecklistApiRequest(checklistId, name).then(data => {
+            console.log(data);
+            alert('checklist updated');
+        }).catch(error => {
+            console.log(error);
+            alert('failed to upadte');
+        });
+    } else {
+        alert('failed to upadte');
+    }
+    refreshDOM();
+}
+
+async function deleteChecklistRequest() {
+    const checklistId = event.srcElement.parentElement.parentElement.parentElement.getAttribute('checklistId');
+    console.log(checklistId);
+    const deleteConfirm = confirm('Are you sure?');
+    if (deleteConfirm) {
+        await deleteChecklistApiRequest(checklistId).then(data => {
+            console.log(data);
+            alert('Checklist Deleted');
+        }).catch(error => {
+            console.log(error);
+            alert('Failed to delete');
+        });
+    } else {
+        alert('Failed to delete');
+    }
+    refreshDOM();
+}
+
+// checklist item functions
+async function addItemRequest() {
+    const checklistId = event.srcElement.parentElement.getAttribute('checklistId');
+    const name = prompt('Add an Item');
+    if (name) {
+        await addItemApiRequest(checklistId, name).then(data => {
+            console.log(data);
+            alert('Item added');
+        }).catch(error => {
+            console.log(error);
+            alert('Failed to add');
+        });
+    } else {
+        alert('Failed to add');
+    }
+    refreshDOM();
+}
+
+async function deleteItemRequest() {
+    const checklistId = event.srcElement.parentElement.parentElement.parentElement.getAttribute('checklistId');
+    const itemId = event.srcElement.parentElement.getAttribute('itemsId');
+    const deleteConfirm = confirm('Are you sure?');
+    if(deleteConfirm){
+        await deleteItemApiRequest(checklistId, itemId).then(data => {
+            console.log(data);
+            alert('Item Deleted');
+        }).catch(error => {
+            console.log(error);
+            alert('Failed to Delete');
+        })
+    }else{
+        alert('Failed to delete');
+    }
     refreshDOM();
 }
