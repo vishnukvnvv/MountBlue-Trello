@@ -1,5 +1,5 @@
-const apiKey = 'apiKey';
-const token = 'token';
+const apiKey = '5942846fd6f9e669e79610ef2fd10d84';
+const token = 'a404c83a3c508a1c70fba3172a20dc3d9ab9366b3c1ea2ac2b045d84111f82a5';
 const access = `key=${apiKey}&token=${token}`;
 const link = 'https://api.trello.com/1/';
 let url;
@@ -111,12 +111,17 @@ function deleteChecklistApiRequest(id) {
 }
 
 // checklist item function
+function getcheklistByIdApiRequest(id) {
+    url = `${link}checklists/${id}?fields=name&cards=all&card_fields=name&${access}`
+    return get(url);
+}
+
 function addItemApiRequest(id, name) {
     url = `${link}checklists/${id}/checkItems?name=${name}&${access}`;
     return post(url);
 }
 
-function deleteItemApiRequest (checklistId, itemId) {
+function deleteItemApiRequest(checklistId, itemId) {
     url = `${link}checklists/${checklistId}/checkItems/${itemId}?${access}`;
     return deleteReq(url);
 }
@@ -128,14 +133,15 @@ title.style.fontWeight = 'bold';
 
 document.getElementById('header').addEventListener('click', goToHomePage);
 
-refreshDOM();
+boardRefresh();
 
-function refreshDOM() {
+function boardRefresh() {
+    // removes previous elements from DOM
     while (container.hasChildNodes()) {
         container.removeChild(container.lastChild);
     }
-
-    if (!JSON.parse(localStorage.getItem('home'))) {
+    // creates home page if true
+    if (JSON.parse(localStorage.getItem('home'))) {
         title.innerText = 'Boards';
         header.style.background = 'blue';
         title.style.background = 'white';
@@ -183,8 +189,8 @@ function refreshDOM() {
     } else {
         title.innerText = JSON.parse(localStorage.getItem('boardName'));
         title.style.color = 'white';
-        header.style.background = 'darkgreen';
         title.style.background = 'green';
+        header.style.background = 'darkgreen';
         container.style.background = 'green';
         getBoardLists(JSON.parse(localStorage.getItem('boardId'))).then(lists => {
             for (let list of lists) {
@@ -271,277 +277,361 @@ function refreshDOM() {
         }).catch(error => {
             console.log(error);
         });
-
-        const checklistDetails = JSON.parse(localStorage.getItem('checklist'));
-        if (checklistDetails.status) {
-            const hasPopUp = document.getElementsByClassName('popUp');
-            if (hasPopUp.length > 0) {
-                document.body.lastElementChild.remove();
-            }
-
-            const cardName = document.createElement('div');
-            cardName.className = 'cardName';
-            cardName.innerText = checklistDetails.name;
-
-            const cardClose = document.createElement('button');
-            cardClose.className = 'cardClose';
-            cardClose.innerText = 'close';
-            cardClose.addEventListener('click', closeChecklistRequest);
-
-            const checklistTitle = document.createElement('div');
-            checklistTitle.className = 'checklistTitle';
-            checklistTitle.appendChild(cardName);
-            checklistTitle.appendChild(cardClose);
-
-            const addChecklist = document.createElement('button');
-            addChecklist.className = 'addChecklist';
-            addChecklist.innerText = 'Add Checklist';
-            addChecklist.setAttribute('cardId', checklistDetails.id);
-            addChecklist.addEventListener('click', addChecklistRequest);
-
-            const checklistContainer = document.createElement('div');
-            checklistContainer.className = 'checklistContainer';
-
-            getChecklistApiRequest(checklistDetails.id).then(checklists => {
-                for (let checklist of checklists) {
-                    const cehcklistText = document.createTextNode(checklist.name);
-
-                    const checklistUpdate = document.createElement('button');
-                    checklistUpdate.className = 'listUpdate';
-                    checklistUpdate.innerText = 'U';
-                    checklistUpdate.addEventListener('click', updateChecklistRequest);
-
-                    const checklistDelete = document.createElement('button');
-                    checklistDelete.className = 'listUpdate boardDelete';
-                    checklistDelete.innerText = 'D';
-                    checklistDelete.addEventListener('click', deleteChecklistRequest);
-
-                    const checkListBtns = document.createElement('div');
-                    checkListBtns.appendChild(checklistUpdate);
-                    checkListBtns.appendChild(checklistDelete);
-
-                    const checklistName = document.createElement('div');
-                    checklistName.className = 'checklistName';
-                    checklistName.appendChild(cehcklistText);
-                    checklistName.appendChild(checkListBtns);
-
-                    const checklistItems = document.createElement('div');
-                    checklistItems.className = 'checklistItems';
-
-                    for (let toDo of checklist.checkItems) {
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-
-                        const listItem = document.createTextNode(toDo.name);
-
-                        const listItemContainer = document.createElement('div');
-                        listItemContainer.appendChild(checkbox);
-                        listItemContainer.appendChild(listItem);
-
-                        const deleteItem = document.createElement('button');
-                        deleteItem.innerText = 'D'
-                        deleteItem.className = 'listUpdate boardDelete';
-                        deleteItem.addEventListener('click', deleteItemRequest);
-
-                        const listItemBox = document.createElement('div');
-                        listItemBox.className = 'listItemBox';
-                        listItemBox.setAttribute('itemsId', toDo.id);
-                        listItemBox.appendChild(listItemContainer);
-                        listItemBox.appendChild(deleteItem);
-
-                        checklistItems.appendChild(listItemBox);
-                    }
-
-                    const addListItem = document.createElement('button');
-                    addListItem.innerText = 'Add an Item';
-                    addListItem.className = 'addChecklist';
-                    addListItem.addEventListener('click', addItemRequest);
-
-                    const checklistBox = document.createElement('div');
-                    checklistBox.className = 'checklistBox';
-                    checklistBox.setAttribute('checklistId', checklist.id);
-                    checklistBox.appendChild(checklistName);
-                    checklistBox.appendChild(checklistItems);
-                    checklistBox.appendChild(addListItem);
-
-                    checklistContainer.appendChild(checklistBox);
-                }
-            })
-
-            const cardDetails = document.createElement('div');
-            cardDetails.className = 'cardDetails';
-            cardDetails.appendChild(checklistTitle);
-            cardDetails.appendChild(addChecklist);
-            cardDetails.appendChild(checklistContainer);
-
-            const popUp = document.createElement('div');
-            popUp.className = 'popUp';
-
-            popUp.appendChild(cardDetails);
-
-            document.body.append(popUp);
-        } else {
-            const popUp = document.getElementsByClassName('popUp');
-            if (popUp.length > 0) {
-                hasPopUp = false;
-                document.body.lastElementChild.remove();
-            }
-        }
     }
 }
 
+function listRefresh(element) {
+    const listId = element.getAttribute('listId');
+    const newConatiner = element.firstChild.nextSibling;
+    const button = element.lastChild;
+    while (newConatiner.children.length) {
+        newConatiner.children[0].remove();
+    }
+    getAllCardsInList(listId).then(cards => {
+        for (let card of cards) {
+            // newConatiner.appendChild(document.createTextNode('Hello'));
+
+            const cardTitle = document.createElement('div');
+            cardTitle.className = 'cardTitle';
+            cardTitle.innerText = card.name;
+            cardTitle.addEventListener('click', openChecklistRequest);
+
+            const cardUpdate = document.createElement('button');
+            cardUpdate.innerText = 'U';
+            cardUpdate.className = 'listUpdate';
+            cardUpdate.addEventListener('click', updateCardRequest);
+
+            const cardDelete = document.createElement('button');
+            cardDelete.innerText = 'D';
+            cardDelete.className = 'listUpdate boardDelete';
+            cardDelete.addEventListener('click', deleteCardRequest);
+
+            const cardBtns = document.createElement('div');
+            cardBtns.className = 'cardBtns';
+            cardBtns.appendChild(cardUpdate);
+            cardBtns.appendChild(cardDelete);
+
+            const newCard = document.createElement('div');
+            newCard.className = 'cards';
+            newCard.setAttribute('cardId', card.id);
+            newCard.appendChild(cardTitle);
+            newCard.appendChild(cardBtns);
+
+            newConatiner.appendChild(newCard);
+        }
+    }).catch(error => {
+        console.log(error);
+    })
+}
+
+function popUpRefresh() {
+    const checklistDetails = JSON.parse(localStorage.getItem('checklist'));
+    if (checklistDetails.status) {
+        const hasPopUp = document.getElementsByClassName('popUp');
+        if (hasPopUp.length > 0) {
+            document.body.lastElementChild.remove();
+        }
+
+        const cardName = document.createElement('div');
+        cardName.className = 'cardName';
+        cardName.innerText = checklistDetails.name;
+
+        const cardClose = document.createElement('button');
+        cardClose.className = 'cardClose';
+        cardClose.innerText = 'close';
+        cardClose.addEventListener('click', closeChecklistRequest);
+
+        const checklistTitle = document.createElement('div');
+        checklistTitle.className = 'checklistTitle';
+        checklistTitle.appendChild(cardName);
+        checklistTitle.appendChild(cardClose);
+
+        const addChecklist = document.createElement('button');
+        addChecklist.className = 'addChecklist';
+        addChecklist.innerText = 'Add Checklist';
+        addChecklist.setAttribute('cardId', checklistDetails.id);
+        addChecklist.addEventListener('click', addChecklistRequest);
+
+        const checklistContainer = document.createElement('div');
+        checklistContainer.className = 'checklistContainer';
+
+        getChecklistApiRequest(checklistDetails.id).then(checklists => {
+            for (let checklist of checklists) {
+                const cehcklistText = document.createElement('div');
+                cehcklistText.innerText = checklist.name;
+
+                const checklistUpdate = document.createElement('button');
+                checklistUpdate.className = 'listUpdate';
+                checklistUpdate.innerText = 'U';
+                checklistUpdate.addEventListener('click', updateChecklistRequest);
+
+                const checklistDelete = document.createElement('button');
+                checklistDelete.className = 'listUpdate boardDelete';
+                checklistDelete.innerText = 'D';
+                checklistDelete.addEventListener('click', deleteChecklistRequest);
+
+                const checkListBtns = document.createElement('div');
+                checkListBtns.appendChild(checklistUpdate);
+                checkListBtns.appendChild(checklistDelete);
+
+                const checklistName = document.createElement('div');
+                checklistName.className = 'checklistName';
+                checklistName.appendChild(cehcklistText);
+                checklistName.appendChild(checkListBtns);
+
+                const checklistItems = document.createElement('div');
+                checklistItems.className = 'checklistItems';
+
+                for (let toDo of checklist.checkItems) {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+
+                    const listItem = document.createTextNode(toDo.name);
+
+                    const listItemContainer = document.createElement('div');
+                    listItemContainer.appendChild(checkbox);
+                    listItemContainer.appendChild(listItem);
+
+                    const deleteItem = document.createElement('button');
+                    deleteItem.innerText = 'D'
+                    deleteItem.className = 'listUpdate boardDelete';
+                    deleteItem.addEventListener('click', deleteItemRequest);
+
+                    const listItemBox = document.createElement('div');
+                    listItemBox.className = 'listItemBox';
+                    listItemBox.setAttribute('itemsId', toDo.id);
+                    listItemBox.appendChild(listItemContainer);
+                    listItemBox.appendChild(deleteItem);
+
+                    checklistItems.appendChild(listItemBox);
+                }
+
+                const addListItem = document.createElement('button');
+                addListItem.innerText = 'Add an Item';
+                addListItem.className = 'addChecklist';
+                addListItem.addEventListener('click', addItemRequest);
+
+                const checklistBox = document.createElement('div');
+                checklistBox.className = 'checklistBox';
+                checklistBox.setAttribute('checklistId', checklist.id);
+                checklistBox.addEventListener('click', stop);
+                checklistBox.appendChild(checklistName);
+                checklistBox.appendChild(checklistItems);
+                checklistBox.appendChild(addListItem);
+
+                checklistContainer.appendChild(checklistBox);
+            }
+        })
+
+        const cardDetails = document.createElement('div');
+        cardDetails.className = 'cardDetails';
+        cardDetails.appendChild(checklistTitle);
+        cardDetails.appendChild(addChecklist);
+        cardDetails.appendChild(checklistContainer);
+        cardDetails.addEventListener('click', stop)
+
+        const popUp = document.createElement('div');
+        popUp.className = 'popUp';
+        popUp.addEventListener('click', closeChecklistRequest);
+
+        popUp.appendChild(cardDetails);
+
+        document.body.append(popUp);
+    } else {
+        const popUp = document.getElementsByClassName('popUp');
+        if (popUp.length > 0) {
+            hasPopUp = false;
+            document.body.lastElementChild.remove();
+        }
+    }
+
+}
+
+function checklistRefresh(element) {
+    const container = element.firstChild.nextSibling;
+    const id = element.getAttribute('checklistId');
+    const button = element.lastChild;
+    while (container.children.length) {
+        container.children[0].remove();
+    }
+    button.innerHtml = '';
+    button.innerText = 'Add an Item';
+    getcheklistByIdApiRequest(id).then(checkItems => {
+        for (let toDo of checkItems.checkItems) {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+
+            const listItem = document.createTextNode(toDo.name);
+
+            const listItemContainer = document.createElement('div');
+            listItemContainer.appendChild(checkbox);
+            listItemContainer.appendChild(listItem);
+
+            const deleteItem = document.createElement('button');
+            deleteItem.innerText = 'D'
+            deleteItem.className = 'listUpdate boardDelete';
+            deleteItem.addEventListener('click', deleteItemRequest);
+
+            const listItemBox = document.createElement('div');
+            listItemBox.className = 'listItemBox';
+            listItemBox.setAttribute('itemsId', toDo.id);
+            listItemBox.appendChild(listItemContainer);
+            listItemBox.appendChild(deleteItem);
+
+            container.appendChild(listItemBox);
+        }
+    }).catch(error => {
+        console.log(error);
+    })
+}
+
 function openBoard() {
-    localStorage.setItem('home', JSON.stringify(true));
+    localStorage.setItem('home', JSON.stringify(false));
     const boardId = event.srcElement.parentElement.getAttribute('boardId');
     localStorage.setItem('boardId', JSON.stringify(boardId));
     const boardName = event.srcElement.innerText;
     localStorage.setItem('boardName', JSON.stringify(boardName));
-    refreshDOM();
+    boardRefresh();
 }
 
 function goToHomePage() {
-    localStorage.setItem('home', JSON.stringify(false));
+    localStorage.setItem('home', JSON.stringify(true));
     localStorage.setItem('checklist', JSON.stringify({ id: 0, name: '', status: false }));
-    refreshDOM();
+    boardRefresh();
 }
 
 // board functions
 async function createBoardRequest() {
-    const name = prompt('Name of the board');
+    let name;
+    await getIput(event.srcElement).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    });
     if (name) {
         await createBoardApiRequest(name).then((data) => {
             console.log(data);
-            alert('created a board');
+            boardRefresh();
         }).catch((error) => {
             console.log(error);
-            alert('failed to create')
         });
-        refreshDOM();
-    } else {
-        alert('failed to create')
     }
 }
 
 async function updateBoardRequest() {
     const id = event.srcElement.parentElement.parentElement.getAttribute('boardId');
-    const name = prompt('New Title');
+    let name;
+    await updateInput(event.srcElement.parentElement.parentElement.firstChild).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    })
     if (name) {
         await updateBoardApiRequest(id, name).then(data => {
             console.log(data);
-            alert('board Updated');
+            boardRefresh();
         }).catch(error => {
             console.log(error);
-            alert('failed to Update');
         });
-        refreshDOM();
-    } else {
-        alert('failed to Update');
     }
 }
 
 async function deleteBoardRequest() {
     const id = event.srcElement.parentElement.parentElement.getAttribute('boardId');
-    const deleteConfirm = confirm('Are you sure?');
-    if (deleteConfirm) {
-        await deleteBoardApiRequest(id).then(data => {
-            console.log(data);
-            alert('board Deleted');
-        }).catch(error => {
-            console.log(error);
-            alert('failed to delete');
-        });
-        refreshDOM();
-    } else {
-        alert('failed to delete');
-    }
+    await deleteBoardApiRequest(id).then(data => {
+        console.log(data);
+        boardRefresh();
+    }).catch(error => {
+        console.log(error);
+    });
 }
 
 // list functions 
 async function listUpdateRequest() {
     const id = event.srcElement.parentElement.parentElement.parentElement.getAttribute('listId');
-    const name = prompt('New List Title');
+    let name;
+    await updateInput(event.srcElement.parentElement.parentElement.firstChild).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    });
     if (name) {
         await updateListApiRequest(id, name).then(data => {
             console.log(data);
-            alert('List title updated');
+            boardRefresh();
         }).catch(error => {
             console.log(error);
-            alert('Failed to update list title');
         })
-        refreshDOM();
-    } else {
-        alert('Failed to update list title');
     }
 }
 
 async function addListRequest() {
-    console.log('list Request');
-    const name = prompt('List Title');
+    event.stopPropagation();
+    let name;
+    await getIput(event.srcElement).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    });
     if (name) {
         await createListApiRequest(name).then(data => {
             console.log(data);
-            alert('List added to the board');
+            boardRefresh();
         }).catch(error => {
             console.log(error);
-            alert('Failed to add list');
         })
-        refreshDOM();
-    } else {
-        alert('falied to add list');
     }
 }
 
 // card Functions 
 async function createCardRequest() {
+    event.preventDefault();
+    const listContainer = event.srcElement.parentElement;
     const listId = event.srcElement.parentElement.getAttribute('listId');
-    const name = prompt('Card Title');
+    let name;
+    await getIput(event.srcElement).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    });
     if (name) {
         await createCardApiRequest(name, listId).then(data => {
             console.log(data);
-            alert('card added to list');
+            listRefresh(listContainer);
         }).catch(error => {
             console.log(error);
-            alert('failed to add card');
         });
-        refreshDOM();
-    } else {
-        alert('failed to add card');
     }
 }
 
 async function updateCardRequest() {
+    const listContainer = event.srcElement.parentElement.parentElement.parentElement.parentElement;
     const id = event.srcElement.parentElement.parentElement.getAttribute('cardId');
-    const name = prompt('New Title');
+    let name;
+    await updateInput(event.srcElement.parentElement.parentElement.firstChild).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    })
     if (name) {
         await updateCardApiRequest(id, name).then(data => {
             console.log(data);
-            alert('Card updated');
+            listRefresh(listContainer);
         }).catch(error => {
             console.log(error);
-            alert('Failed to update card');
         });
-        refreshDOM();
-    } else {
-        alert('Failed to update card');
     }
 }
 
 async function deleteCardRequest() {
-    console.log('delete Card Request')
+    const listContainer = event.srcElement.parentElement.parentElement.parentElement.parentElement;
     const id = event.srcElement.parentElement.parentElement.getAttribute('cardId');
-    const deleteConfirm = confirm('Are you sure?')
-    if (deleteConfirm) {
-        await deleteCardApiRequest(id).then(data => {
-            console.log(data);
-            alert('Card deleted');
-        }).catch(error => {
-            console.log(error);
-            alert('Failed to delete card');
-        });
-        refreshDOM();
-    } else {
-        alert('Failed to delete card');
-    }
+    await deleteCardApiRequest(id).then(data => {
+        console.log(data);
+        listRefresh(listContainer);
+    }).catch(error => {
+        console.log(error);
+    });
 }
 
 // checklists function
@@ -549,98 +639,165 @@ function openChecklistRequest() {
     const cardName = event.srcElement.innerText;
     const cardId = event.srcElement.parentElement.getAttribute('cardId');
     localStorage.setItem('checklist', JSON.stringify({ id: cardId, name: cardName, status: true }));
-    refreshDOM();
+    popUpRefresh();
 }
 
 function closeChecklistRequest() {
     localStorage.setItem('checklist', JSON.stringify({ id: 0, name: '', status: false }));
-    refreshDOM();
+    popUpRefresh();
 }
 
 async function addChecklistRequest() {
+    event.stopPropagation();
     const cardId = event.srcElement.getAttribute('CardId');
-    const name = prompt('New cheklist name?');
+    let name;
+    await getIput(event.srcElement).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    });
     if (name) {
         await addChecklistApiRequest(cardId, name).then(data => {
             console.log(data);
-            alert('CheckList added');
+            popUpRefresh();
         }).catch(error => {
             console.log(error);
-            alert('Failed to add checkList');
         });
-    } else {
-        alert('Failed to add checkList');
     }
-    refreshDOM();
 }
 
 async function updateChecklistRequest() {
+    event.stopPropagation();
     const checklistId = event.srcElement.parentElement.parentElement.parentElement.getAttribute('checklistId');
-    const name = prompt('New Title');
+    let name;
+    await updateInput(event.srcElement.parentElement.parentElement.firstChild).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    })
+    // console.log(name);
     if (name) {
         await updateChecklistApiRequest(checklistId, name).then(data => {
             console.log(data);
-            alert('checklist updated');
+            popUpRefresh();
         }).catch(error => {
             console.log(error);
-            alert('failed to upadte');
         });
-    } else {
-        alert('failed to upadte');
     }
-    refreshDOM();
 }
 
 async function deleteChecklistRequest() {
+    event.stopPropagation();
     const checklistId = event.srcElement.parentElement.parentElement.parentElement.getAttribute('checklistId');
-    console.log(checklistId);
-    const deleteConfirm = confirm('Are you sure?');
-    if (deleteConfirm) {
-        await deleteChecklistApiRequest(checklistId).then(data => {
-            console.log(data);
-            alert('Checklist Deleted');
-        }).catch(error => {
-            console.log(error);
-            alert('Failed to delete');
-        });
-    } else {
-        alert('Failed to delete');
-    }
-    refreshDOM();
+    await deleteChecklistApiRequest(checklistId).then(data => {
+        console.log(data);
+        popUpRefresh();
+    }).catch(error => {
+        console.log(error);
+    });
 }
 
 // checklist item functions
 async function addItemRequest() {
+    event.preventDefault();
+    event.stopPropagation();
+    const checklistContainer = event.srcElement.parentElement;
     const checklistId = event.srcElement.parentElement.getAttribute('checklistId');
-    const name = prompt('Add an Item');
+    let name;
+    await getIput(event.srcElement).then(data => {
+        name = data;
+    }).catch(error => {
+        console.log(error);
+    });
     if (name) {
         await addItemApiRequest(checklistId, name).then(data => {
             console.log(data);
-            alert('Item added');
+            checklistRefresh(checklistContainer);
         }).catch(error => {
             console.log(error);
-            alert('Failed to add');
         });
-    } else {
-        alert('Failed to add');
     }
-    refreshDOM();
 }
 
 async function deleteItemRequest() {
+    event.stopPropagation();
+    const checklistContainer = event.srcElement.parentElement.parentElement.parentElement;
     const checklistId = event.srcElement.parentElement.parentElement.parentElement.getAttribute('checklistId');
     const itemId = event.srcElement.parentElement.getAttribute('itemsId');
-    const deleteConfirm = confirm('Are you sure?');
-    if(deleteConfirm){
-        await deleteItemApiRequest(checklistId, itemId).then(data => {
-            console.log(data);
-            alert('Item Deleted');
-        }).catch(error => {
-            console.log(error);
-            alert('Failed to Delete');
-        })
-    }else{
-        alert('Failed to delete');
-    }
-    refreshDOM();
+    await deleteItemApiRequest(checklistId, itemId).then(data => {
+        console.log(data);
+        checklistRefresh(checklistContainer);
+    }).catch(error => {
+        console.log(error);
+    })
+}
+
+// get input function 
+let inputText;
+function getIput(element) {
+    if(element.innerText)
+    inputText = element.innerText;
+    element.innerText = '';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.style.border = '1px solid';
+    input.style.borderRadius = '5px';
+    input.style.width = 'inherit';
+    element.appendChild(input);
+    input.focus();
+    input.addEventListener('blur', getInputBack);
+    return new Promise((resolve, reject) => {
+        input.addEventListener('keypress', () => {
+            if (event.keyCode === 13){
+                input.blur();
+                resolve((event.target.value).trim());
+            }
+        });
+    });
+}
+
+// update input function
+let preName;
+function updateInput(element) {
+    preName = element.innerText;
+    element.innerText = '';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.style.border = '1px solid';
+    input.style.borderRadius = '5px';
+    input.style.width = 'inherit';
+    input.value = preName;
+    element.appendChild(input);
+    input.focus();
+    input.addEventListener('blur', getUpdateBack);
+    return new Promise((resolve, reject) => {
+        input.addEventListener('keypress', () => {
+            event.stopPropagation();
+            if (event.keyCode === 13) {
+                if ((event.target.value).trim() === preName) {
+                    element.innerHtml = '';
+                    element.innerText = preName;
+                    resolve('');
+                } else {
+                    resolve((event.target.value).trim());
+                }
+            }
+        });
+    });
+}
+
+function stop() {
+    event.stopPropagation();
+}
+
+function getInputBack() {
+    const element = event.srcElement.parentElement;
+    element.innerHtml = '';
+    element.innerText = inputText;
+}
+
+function getUpdateBack() {
+    const element = event.srcElement.parentElement;
+    element.innerHtml = '';
+    element.innerText = preName;
 }
