@@ -1,5 +1,5 @@
-const apiKey = '5942846fd6f9e669e79610ef2fd10d84';
-const token = 'a404c83a3c508a1c70fba3172a20dc3d9ab9366b3c1ea2ac2b045d84111f82a5';
+const apiKey = 'apiKey';
+const token = 'token';
 const access = `key=${apiKey}&token=${token}`;
 const link = 'https://api.trello.com/1/';
 let url;
